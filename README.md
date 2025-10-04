@@ -1,2 +1,2 @@
 # Skylikely-PixelStorm
-# Rama Principal para la parte de back
+# Rama de desarrollo para la parte de back
