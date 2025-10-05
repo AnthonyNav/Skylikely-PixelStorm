@@ -1,191 +1,220 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import { useAppStore } from "@store/useAppStore.js";
 
-// Token público de Mapbox válido para testing
-const MAPBOX_TOKEN = "pk.eyJ1IjoidGVzdGluZy1tYXBib3giLCJhIjoiY2wyY2RobzY5MDIzczNkcGZua3o2OTFvcSJ9.YnJlT0g4Q3NlQnZCY0l3Vw";
+// Token de Mapbox desde variables de entorno (Vite)
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 export default function MapboxView() {
-  const { lat, lon, setCoords } = useAppStore();
-  const mapContainer = useRef(null);
-  const map = useRef(null);
-  const marker = useRef(null);
+  const { lat, lon, setCoords, panelVisible } = useAppStore();
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
+
+  // Estado y refs para auto-rotación
+  const [autoRotate, setAutoRotate] = useState(true);
+  const [rotateOnlyWhenGlobe, setRotateOnlyWhenGlobe] = useState(true);
+  const rafId = useRef(null);
+  const lastTs = useRef(0);
+  const resumeTimer = useRef(null);
+  const interacting = useRef(false);
+  // Rotar solo cuando el globo se ve completo (zoom bajo)
+  const ROTATE_ZOOM_MAX = 2.0; // ajusta este valor a tu preferencia
+
+  const stopRotation = () => {
+    if (rafId.current) {
+      cancelAnimationFrame(rafId.current);
+      rafId.current = null;
+    }
+    lastTs.current = 0;
+  };
+
+  const step = (ts) => {
+    const map = mapRef.current;
+    if (!map || !autoRotate) return;
+    if (!lastTs.current) lastTs.current = ts;
+    const dt = (ts - lastTs.current) / 1000; // segundos
+    lastTs.current = ts;
+    const speedDegPerSec = 2; // velocidad de rotación
+    const c = map.getCenter();
+    map.setCenter([c.lng + speedDegPerSec * dt, c.lat]);
+    rafId.current = requestAnimationFrame(step);
+  };
+
+  const startRotation = () => {
+    if (!mapRef.current || !autoRotate) return;
+    // Evitar competir con una interacción en curso
+    if (interacting.current) return;
+    // Solo rotar si el zoom está lo suficientemente alejado
+    const z = mapRef.current.getZoom();
+    if (rotateOnlyWhenGlobe && z > ROTATE_ZOOM_MAX) return;
+    if (rafId.current) return;
+    rafId.current = requestAnimationFrame(step);
+  };
 
   useEffect(() => {
-    if (map.current) return; // initialize map only once
+    if (mapRef.current) return; // solo una vez
 
-    try {
-      // Set Mapbox access token
-      mapboxgl.accessToken = MAPBOX_TOKEN;
+    mapboxgl.accessToken = MAPBOX_TOKEN;
 
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: {
-          "version": 8,
-          "sources": {
-            "osm": {
-              "type": "raster",
-              "tiles": [
-                "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-              ],
-              "tileSize": 256,
-              "attribution": "© OpenStreetMap contributors"
-            }
-          },
-          "layers": [
-            {
-              "id": "osm",
-              "type": "raster",
-              "source": "osm"
-            }
-          ]
-        },
-        projection: "globe", // Proyección globe con transición automática
-        center: [lon, lat],
-        zoom: 2,
-        pitch: 0,
-        bearing: 0,
-        antialias: true
-      });
-    } catch (error) {
-      console.error("Error initializing Mapbox:", error);
-      
-      // Fallback sin globe projection si falla
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: {
-          "version": 8,
-          "sources": {
-            "osm": {
-              "type": "raster",
-              "tiles": [
-                "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-              ],
-              "tileSize": 256,
-              "attribution": "© OpenStreetMap contributors"
-            }
-          },
-          "layers": [
-            {
-              "id": "osm",
-              "type": "raster",
-              "source": "osm"
-            }
-          ]
-        },
-        center: [lon, lat],
-        zoom: 2,
-        antialias: true
-      });
-    }
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      // Usar estilo con etiquetas sobre satélite
+      style: "mapbox://styles/mapbox/satellite-streets-v12",
+      projection: "globe",
+      center: [lon, lat],
+      zoom: 2,
+      pitch: 0,
+      bearing: 0,
+      antialias: true,
+    });
+    mapRef.current = map;
 
-    // Configuraciones adicionales para el globo
-    map.current.on("style.load", () => {
+    map.on("style.load", () => {
       try {
-        // Configurar la atmósfera del globo solo si está disponible
-        if (map.current.setFog) {
-          map.current.setFog({
-            "range": [0.5, 10],
-            "color": "#ffffff",
+        if (map.setFog) {
+          map.setFog({
+            range: [0.5, 10],
+            color: "#ffffff",
             "horizon-blend": 0.1,
             "high-color": "#add8e6",
             "space-color": "#000000",
-            "star-intensity": 0.15
+            "star-intensity": 0.15,
           });
         }
+        // Asegurar visibilidad de etiquetas en el globo
+        if (map.getStyle && map.setLayoutProperty) {
+          const layers = map.getStyle().layers || [];
+          layers.forEach((ly) => {
+            if (
+              ly.type === "symbol" ||
+              (ly.id && /label|place|country|state|settlement|poi/i.test(ly.id))
+            ) {
+              try { map.setLayoutProperty(ly.id, "visibility", "visible"); } catch {}
+            }
+          });
+        }
+        // Habilitar paneo y rotación manual SIEMPRE (independiente del zoom)
+        map.dragPan.enable();
+        map.dragRotate.enable();
+        if (map.touchZoomRotate && typeof map.touchZoomRotate.enable === "function") {
+          map.touchZoomRotate.enable(true);
+        }
+        // Cambiar proyección según zoom y controlar solo la detención por acercamiento
+        map.on("zoom", () => {
+          const z = map.getZoom();
+          if (z > 5 && map.setProjection) map.setProjection("mercator");
+          else if (map.setProjection) map.setProjection("globe");
 
-        // Transición automática a mercator al hacer zoom
-        map.current.on("zoom", () => {
-          const zoom = map.current.getZoom();
-          if (zoom > 5 && map.current.setProjection) {
-            map.current.setProjection("mercator");
-          } else if (map.current.setProjection) {
-            map.current.setProjection("globe");
+          // Si el usuario se acerca, parar rotación. El arranque se decide en 'idle'.
+          if (rotateOnlyWhenGlobe && z > ROTATE_ZOOM_MAX) {
+            stopRotation();
           }
         });
-      } catch (error) {
-        console.warn("Globe features not available:", error);
+        // Iniciar rotación si está activada
+        startRotation();
+      } catch (e) {
+        console.warn("Globe features not available:", e);
       }
     });
 
-    // Crear marcador inicial
-    marker.current = new mapboxgl.Marker({
-      color: "#EF4444",
-      scale: 1.2
-    })
+    // Marcador inicial
+    markerRef.current = new mapboxgl.Marker({ color: "#EF4444", scale: 1.2 })
       .setLngLat([lon, lat])
-      .addTo(map.current);
+      .addTo(map);
 
-    // Event listener para clicks en el mapa
-    map.current.on("click", (e) => {
+    // Click para mover pin y volar
+    map.on("click", (e) => {
       const { lng, lat: clickedLat } = e.lngLat;
-      
-      // Actualizar coordenadas en el store
+      // Solo parar en click; no reanudar automáticamente para no interferir con rotación manual posterior
+      stopRotation();
+      if (resumeTimer.current) clearTimeout(resumeTimer.current);
+
       setCoords(clickedLat, lng);
-      
-      // Mover el marcador
-      marker.current.setLngLat([lng, clickedLat]);
-      
-      // Centrar el mapa en el nuevo punto
-      map.current.flyTo({
-        center: [lng, clickedLat],
-        zoom: Math.max(map.current.getZoom(), 6),
-        duration: 1000
-      });
+      markerRef.current?.setLngLat([lng, clickedLat]);
+      map.flyTo({ center: [lng, clickedLat], zoom: Math.max(map.getZoom(), 6), duration: 1000 });
     });
 
-    // Configurar controles de navegación
-    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+    // Controles de navegación
+  // Controles de navegación con brújula (indica que se puede rotar)
+  map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), "top-right");
 
-    // Cleanup
+  // Pausar en cualquier inicio de interacción y marcar estado
+    const onInteractStart = () => {
+      interacting.current = true;
+      stopRotation();
+      if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    };
+    map.on("dragstart", onInteractStart);
+    map.on("zoomstart", onInteractStart);
+    map.on("rotatestart", onInteractStart);
+    map.on("pitchstart", onInteractStart);
+    map.on("mousedown", onInteractStart);
+    map.on("touchstart", onInteractStart);
+    map.on("wheel", onInteractStart);
+
+    // Reconsiderar reanudar sólo cuando el mapa esté completamente en reposo
+    map.on("idle", () => {
+      interacting.current = false;
+      if (!autoRotate) return;
+      const z = map.getZoom();
+      if (rotateOnlyWhenGlobe && z > ROTATE_ZOOM_MAX) return;
+      if (resumeTimer.current) clearTimeout(resumeTimer.current);
+      resumeTimer.current = setTimeout(() => {
+        if (!interacting.current) startRotation();
+      }, 600);
+    });
+
     return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
+      stopRotation();
+      if (resumeTimer.current) clearTimeout(resumeTimer.current);
+      map.remove();
+      mapRef.current = null;
     };
   }, []);
 
-  // Actualizar posición cuando cambian las coordenadas desde el store
+  // Ajustar el canvas del mapa cuando cambie el tamaño del contenedor (p.ej., al ocultar/mostrar panel)
   useEffect(() => {
-    if (map.current && marker.current) {
-      marker.current.setLngLat([lon, lat]);
-      map.current.flyTo({
-        center: [lon, lat],
-        zoom: Math.max(map.current.getZoom(), 6),
-        duration: 1000
-      });
+    const el = mapContainerRef.current;
+    const map = mapRef.current;
+    if (!el || !map) return;
+    const ro = new ResizeObserver(() => {
+      try { map.resize(); } catch {}
+    });
+    ro.observe(el);
+    const onTransitionEnd = () => { try { map.resize(); } catch {} };
+    el.addEventListener("transitionend", onTransitionEnd);
+    window.addEventListener("resize", onTransitionEnd);
+    return () => {
+      ro.disconnect();
+      el.removeEventListener("transitionend", onTransitionEnd);
+      window.removeEventListener("resize", onTransitionEnd);
+    };
+  }, []);
+
+  // Tras el toggle del panel, esperar el fin de la animación y forzar resize
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const timeout = setTimeout(() => {
+      try { map.resize(); } catch {}
+    }, 320); // coincide con Tailwind duration-300
+    return () => clearTimeout(timeout);
+  }, [panelVisible]);
+
+  // Seguir cambios de coordenadas desde el store
+  useEffect(() => {
+    const map = mapRef.current;
+    const marker = markerRef.current;
+    if (map && marker) {
+      marker.setLngLat([lon, lat]);
+      map.flyTo({ center: [lon, lat], zoom: Math.max(map.getZoom(), 6), duration: 1000 });
     }
   }, [lat, lon]);
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
-      <div 
-        ref={mapContainer} 
-        style={{ 
-          width: "100%", 
-          height: "100%",
-          borderRadius: "inherit"
-        }} 
-      />
-      
-      {/* Loading indicator */}
-      <div 
-        style={{
-          position: "absolute",
-          top: "20px",
-          left: "20px",
-          background: "rgba(255,255,255,0.9)",
-          padding: "8px 12px",
-          borderRadius: "6px",
-          fontSize: "12px",
-          color: "#666",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-        }}
-        id="loading-info"
-      >
-        🌍 Modo Globe - Zoom para cambiar a Mercator
-      </div>
+      <div ref={mapContainerRef} style={{ width: "100%", height: "100%", borderRadius: "inherit" }} />
     </div>
   );
 }

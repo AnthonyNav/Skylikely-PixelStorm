@@ -3,13 +3,14 @@ import Controls from "@components/Controls.jsx";
 import ProbabilityCards from "@components/ProbabilityCards.jsx";
 import TimeSeriesChart from "@components/TimeSeriesChart.jsx";
 import MapView from "@components/MapView.jsx";
+import MapboxView from "@components/MapboxView.jsx";
 
 import MapModeSwitch from "@components/MapModeSwitch.jsx";
 import SearchBar from "@components/SearchBar.jsx";
 import CoordInputs from "@components/CoordInputs.jsx";
 
 export default function App() {
-  const { data, loading, panelVisible, togglePanel } = useAppStore();
+  const { data, loading, mapMode, panelVisible, togglePanel } = useAppStore();
   
   return (
     <div className="h-screen flex flex-col">
@@ -84,14 +85,14 @@ export default function App() {
 
         <section className="flex-1 relative">
           <div className="absolute inset-0 m-4 rounded-2xl overflow-hidden border bg-white shadow-sm">
-            <MapView />
+            {mapMode === "3d" ? <MapboxView /> : <MapView />}
           </div>
         </section>
       </main>
 
       <footer className="border-t bg-white">
         <div className="max-w-6xl mx-auto px-4 py-3 text-xs text-slate-500">
-                    Datos de ejemplo precomputados. Mapas © OpenStreetMap contributors, © Esri.
+                    Datos de ejemplo precomputados. Mapas © Mapbox, OpenStreetMap contributors, © Esri.
         </div>
       </footer>
     </div>
