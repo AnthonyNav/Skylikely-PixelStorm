@@ -30,14 +30,17 @@ export const useAppStore = create((set, get) => ({
   setData: (d) => set({ data: d }),
 
   calculate: async () => {
+    const s = get();
     set({ loading: true, error: null });
-    const { date_of_interest } = get();
     try {
-      const doy = dateISOToDoy(date_of_interest);
-      const json = await fetchSample(`/data/samples/puebla_doy${doy}.json`);
+      const doy = dateISOToDoy(s.date_of_interest);
+      // convención: <ciudad>_doyNNN.json (ajusta el prefijo si quieres)
+      const path = `/data/samples/texas_doy${String(doy).padStart(3, "0")}.json`;
+      const json = await fetchSample(path);
       set({ data: json, loading: false });
     } catch {
-      set({ loading: false, error: "No hay datos para esa fecha. Carga de ejemplo fallida." });
+      set({ loading: false, error: "No hay JSON de prueba para esa fecha." });
     }
   },
 }));
+

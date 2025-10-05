@@ -1,5 +1,5 @@
 {
-  "lat": 19.043, "lon": -98.198, "doy": 278, "window": 10, "years": [2001,2024],
+  "lat": 23.9892, "lon": -98.7027, "doy": 1, "window": 10, "years": [2001,2024],
   "vars": ["t2m","prcp","wind10m"],
   "thresholds": {"very_hot_C":32,"very_wet_mm":10,"very_windy_ms":10},
   "stats": {
