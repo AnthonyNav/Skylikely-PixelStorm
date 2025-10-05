@@ -1,15 +1,17 @@
 import { useAppStore } from "@store/useAppStore.js";
+import ProximityGlow from "@components/ui/ProximityGlow.jsx";
 
 export default function MapModeSwitch() {
   const { mapMode, setMapMode } = useAppStore();
   return (
-    <div className="flex items-center bg-slate-100 rounded-lg p-1">
+    <ProximityGlow className="rounded-2xl">
+    <div className="flex items-center rounded-2xl p-1 bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 backdrop-blur-md shadow-sm">
       <button
         onClick={() => setMapMode("2d")}
-        className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+        className={`flex-1 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
           mapMode === "2d"
-            ? "bg-white text-slate-900 shadow-sm"
-            : "text-slate-600 hover:text-slate-900"
+            ? "bg-white text-slate-900 shadow-sm dark:bg-slate-200"
+            : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
         }`}
       >
         <span className="flex items-center justify-center space-x-2">
@@ -22,10 +24,10 @@ export default function MapModeSwitch() {
       
       <button
         onClick={() => setMapMode("3d")}
-        className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+        className={`flex-1 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
           mapMode === "3d"
-            ? "bg-white text-slate-900 shadow-sm"
-            : "text-slate-600 hover:text-slate-900"
+            ? "bg-white text-slate-900 shadow-sm dark:bg-slate-200"
+            : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
         }`}
       >
         <span className="flex items-center justify-center space-x-2">
@@ -36,5 +38,6 @@ export default function MapModeSwitch() {
         </span>
       </button>
     </div>
+    </ProximityGlow>
   );
 }
