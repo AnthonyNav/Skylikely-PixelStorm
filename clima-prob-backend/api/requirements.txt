@@ -5,7 +5,7 @@ pydantic-settings==2.4.0
 python-dotenv==1.0.1
 
 # Ciencia de datos / IO
-numpy==2.1.1
+numpy==1.26.4
 pandas==2.2.3
 xarray==2024.7.0
 netCDF4==1.7.1

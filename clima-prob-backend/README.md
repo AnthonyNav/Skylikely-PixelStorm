@@ -5,6 +5,12 @@ Backend para estimar **probabilidades climatológicas de excedencia** (very hot 
 > ⚠️ Importante: este backend **no es un pronóstico**. Calcula probabilidades basadas en climatología histórica y (opcionalmente) una tendencia temporal.
 
 ---
+#### Para ejecutar  
+```
+python -m uvicorn api.app.main:app --reload --port 8080
+```
+
+---
 
 ## Características
 
