@@ -15,26 +15,30 @@ export default function Controls() {
 
   return (
     <div className="grid grid-cols-1 gap-4 text-sm">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between bg-white rounded-lg p-3 border">
         <div>
-          <div className="font-medium mb-1">Coordenadas</div>
-          <div className="text-slate-600">Lat: {lat.toFixed(4)} · Lon: {lon.toFixed(4)}</div>
+          <div className="font-medium mb-1 text-slate-800">Coordenadas</div>
+          <div className="text-slate-600 text-xs">Lat: {lat.toFixed(4)} · Lon: {lon.toFixed(4)}</div>
         </div>
-        <button onClick={calculate} disabled={loading} className="px-3 py-2 rounded-lg border bg-white hover:bg-slate-50 disabled:opacity-50">
+        <button 
+          onClick={calculate} 
+          disabled={loading} 
+          className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+        >
           {loading ? "Calculando…" : "Calcular"}
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <label className="font-medium block mb-1">Fecha</label>
-          <input type="date" value={date_of_interest} onChange={(e)=>setDate(e.target.value)} className="border rounded px-2 py-1 w-full"/>
-          <div className="text-slate-500 mt-1">Seleccionada: {nice} · DOY: {doy}</div>
+          <label className="font-medium block mb-1 text-slate-700">Fecha</label>
+          <input type="date" value={date_of_interest} onChange={(e)=>setDate(e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
+          <div className="text-slate-500 mt-1 text-xs">Seleccionada: {nice} · DOY: {doy}</div>
         </div>
 
         <div>
-          <label className="font-medium block mb-1">Modelo</label>
-          <select value={engine} onChange={(e)=>setEngine(e.target.value)} className="border rounded px-2 py-1 w-full">
+          <label className="font-medium block mb-1 text-slate-700">Modelo</label>
+          <select value={engine} onChange={(e)=>setEngine(e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             <option value="logistic">logistic</option>
             <option value="climatology">climatology</option>
             <option value="gev">gev</option>
@@ -42,44 +46,49 @@ export default function Controls() {
         </div>
 
         <div>
-          <label className="font-medium block mb-1">Ventana ± días: {window_days}</label>
-          <input type="range" min="5" max="45" value={window_days} onChange={(e)=>setWindow(parseInt(e.target.value))} className="w-full" />
+          <label className="font-medium block mb-1 text-slate-700">Ventana ± días: {window_days}</label>
+          <input type="range" min="5" max="45" value={window_days} onChange={(e)=>setWindow(parseInt(e.target.value))} className="w-full custom-slider" />
         </div>
 
         <div>
-          <label className="font-medium block mb-1">Modo espacial</label>
-          <select value={spatial_mode} onChange={(e)=>setSpatialMode(e.target.value)} className="border rounded px-2 py-1 w-full">
+          <label className="font-medium block mb-1 text-slate-700">Modo espacial</label>
+          <select value={spatial_mode} onChange={(e)=>setSpatialMode(e.target.value)} className="border border-slate-300 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             <option value="nearest">nearest</option>
             <option value="box_avg">box_avg</option>
           </select>
           <div className="mt-2">
-            <label className="text-sm">Área (km) {spatial_mode!=="box_avg" ? "(inactivo)" : ""}</label>
+            <label className="text-sm text-slate-700">Área (km) {spatial_mode!=="box_avg" ? "(inactivo)" : ""}</label>
             <input type="number" min="1" value={area_km}
                    disabled={spatial_mode!=="box_avg"}
                    onChange={(e)=>setAreaKm(Number(e.target.value))}
-                   className="border rounded px-2 py-1 w-full disabled:bg-slate-100"/>
+                   className="border border-slate-300 rounded-lg px-3 py-2 w-full text-sm disabled:bg-slate-100 disabled:text-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <div>
-          <label className="font-medium">Muy caliente (°C): {thresholds.very_hot_C}</label>
-          <input type="number" className="border rounded px-2 py-1 w-full"
-                 value={thresholds.very_hot_C}
-                 onChange={(e)=>setThresholds({ ...thresholds, very_hot_C: Number(e.target.value) })}/>
-        </div>
-        <div>
-          <label className="font-medium">Muy húmedo (mm): {thresholds.very_wet_mm}</label>
-          <input type="number" className="border rounded px-2 py-1 w-full"
-                 value={thresholds.very_wet_mm}
-                 onChange={(e)=>setThresholds({ ...thresholds, very_wet_mm: Number(e.target.value) })}/>
-        </div>
-        <div>
-          <label className="font-medium">Muy ventoso (m/s): {thresholds.very_windy_ms}</label>
-          <input type="number" className="border rounded px-2 py-1 w-full"
-                 value={thresholds.very_windy_ms}
-                 onChange={(e)=>setThresholds({ ...thresholds, very_windy_ms: Number(e.target.value) })}/>
+      <div className="grid grid-cols-1 gap-3">
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <h4 className="font-medium text-slate-800 mb-3 text-sm">Umbrales de Extremos</h4>
+          <div className="grid grid-cols-1 gap-3">
+            <div>
+              <label className="text-sm text-slate-700 font-medium block mb-1">Muy caliente (°C): {thresholds.very_hot_C}</label>
+              <input type="number" className="border border-slate-300 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     value={thresholds.very_hot_C}
+                     onChange={(e)=>setThresholds({ ...thresholds, very_hot_C: Number(e.target.value) })}/>
+            </div>
+            <div>
+              <label className="text-sm text-slate-700 font-medium block mb-1">Muy húmedo (mm): {thresholds.very_wet_mm}</label>
+              <input type="number" className="border border-slate-300 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     value={thresholds.very_wet_mm}
+                     onChange={(e)=>setThresholds({ ...thresholds, very_wet_mm: Number(e.target.value) })}/>
+            </div>
+            <div>
+              <label className="text-sm text-slate-700 font-medium block mb-1">Muy ventoso (m/s): {thresholds.very_windy_ms}</label>
+              <input type="number" className="border border-slate-300 rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     value={thresholds.very_windy_ms}
+                     onChange={(e)=>setThresholds({ ...thresholds, very_windy_ms: Number(e.target.value) })}/>
+            </div>
+          </div>
         </div>
       </div>
 
