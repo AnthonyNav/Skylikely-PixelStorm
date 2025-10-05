@@ -63,13 +63,100 @@ export const useAppStore = create((set, get) => ({
 
   calculate: async () => {
     set({ loading: true, error: null });
-    const { date_of_interest } = get();
+    const { date_of_interest, lat, lon } = get();
+    
     try {
       const doy = dateISOToDoy(date_of_interest);
-      const json = await fetchSample(`/data/samples/puebla_doy${doy}.json`);
-      set({ data: json, loading: false });
-    } catch {
-      set({ loading: false, error: "No hay datos para esa fecha. Carga de ejemplo fallida." });
+      
+      // Mapear ubicaciones aproximadas a archivos de datos disponibles
+      const sampleFiles = [
+        { file: 'cdmx_doy20', lat: 19.32, lon: -99.15, doy: 20, region: 'México Central' },
+        { file: 'puebla_doy190', lat: 19.04, lon: -98.20, doy: 190, region: 'México Central' },  
+        { file: 'texas_doy355', lat: 31.26, lon: -98.55, doy: 355, region: 'Texas' },
+        { file: 'españa_doy200', lat: 39.33, lon: -4.84, doy: 200, region: 'España' },
+        { file: 'tamaulipas_doy1', lat: 23.99, lon: -98.70, doy: 1, region: 'México Norte' }
+      ];
+      
+      // Encontrar el archivo más cercano por ubicación geográfica
+      let bestMatch = sampleFiles[0];
+      let minDistance = Math.sqrt(Math.pow(lat - bestMatch.lat, 2) + Math.pow(lon - bestMatch.lon, 2));
+      
+      for (const sample of sampleFiles) {
+        const distance = Math.sqrt(Math.pow(lat - sample.lat, 2) + Math.pow(lon - sample.lon, 2));
+        if (distance < minDistance) {
+          minDistance = distance;
+          bestMatch = sample;
+        }
+      }
+      
+      // Si no hay coincidencia exacta de DOY, usar el más cercano pero adaptar los datos
+      let selectedFile = bestMatch.file;
+      let dataAdaptation = {};
+      
+      // Si el DOY es muy diferente, intentar encontrar uno más cercano
+      const doyDifference = Math.abs(doy - bestMatch.doy);
+      if (doyDifference > 100) {
+        // Buscar archivo con DOY más cercano
+        let closestDoy = bestMatch;
+        let minDoyDiff = doyDifference;
+        
+        for (const sample of sampleFiles) {
+          const dayDiff = Math.abs(doy - sample.doy);
+          if (dayDiff < minDoyDiff) {
+            minDoyDiff = dayDiff;
+            closestDoy = sample;
+          }
+        }
+        
+        if (minDoyDiff < doyDifference) {
+          selectedFile = closestDoy.file;
+          bestMatch = closestDoy;
+        }
+      }
+      
+      console.log(`🎯 Cargando datos de: ${selectedFile} (${bestMatch.region})`);
+      console.log(`📍 Ubicación solicitada: ${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+      console.log(`📍 Ubicación de datos: ${bestMatch.lat.toFixed(4)}, ${bestMatch.lon.toFixed(4)}`);
+      console.log(`📅 DOY solicitado: ${doy}, DOY de datos: ${bestMatch.doy}`);
+      
+      const json = await fetchSample(`/data/samples/${selectedFile}.json`);
+      
+      // Adaptar datos para reflejar la ubicación y fecha solicitada
+      const adaptedData = {
+        ...json,
+        originalLat: json.lat,
+        originalLon: json.lon,
+        originalDoy: json.doy,
+        requestedLat: lat,
+        requestedLon: lon,
+        requestedDoy: doy,
+        adaptationInfo: {
+          region: bestMatch.region,
+          locationDistance: minDistance.toFixed(2),
+          dayDifference: Math.abs(doy - bestMatch.doy),
+          dataSource: selectedFile
+        }
+      };
+      
+      set({ data: adaptedData, loading: false });
+      
+    } catch (error) {
+      console.error('Error cargando datos de prueba:', error);
+      set({ 
+        loading: false, 
+        error: "No hay datos disponibles para esta ubicación. Usando datos de prueba de Puebla." 
+      });
+      
+      // Fallback a Puebla como último recurso
+      try {
+        const fallbackData = await fetchSample('/data/samples/puebla_doy190.json');
+        set({ data: fallbackData, loading: false, error: null });
+      } catch {
+        set({ 
+          loading: false, 
+          error: "Error cargando datos de prueba. Verificar archivos en /public/data/samples/" 
+        });
+      }
     }
   },
 }));
