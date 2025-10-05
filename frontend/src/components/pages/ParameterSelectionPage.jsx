@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useAppStore } from "@store/useAppStore.js";
 import { motion } from "framer-motion";
 import MapView from "@components/MapView.jsx";
@@ -17,11 +18,23 @@ export default function ParameterSelectionPage({ onCalculate }) {
     setDate, setEngine, setWindow, setSpatialMode, setAreaKm, calculate
   } = useAppStore();
 
+  // Toast state
+  const [showToast, setShowToast] = useState(true);
+
   const nice = dayjs(date_of_interest).format("DD/MM/YYYY");
   const doy = dateISOToDoy(date_of_interest);
 
   // Verificar si los parámetros mínimos están listos
   const canCalculate = lat !== null && lon !== null && date_of_interest && !loading;
+
+  // Auto-hide toast after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowToast(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCalculate = async () => {
     if (!canCalculate) return;
@@ -61,7 +74,44 @@ export default function ParameterSelectionPage({ onCalculate }) {
       </header>
 
       <main className="flex-1 flex overflow-hidden relative">
-        <aside className={`flex flex-col h-full flex-shrink-0 transition-all duration-300 overflow-hidden ${panelVisible ? 'w-80' : 'w-0'}`}>
+        {/* Motivational Toast - Top Center */}
+        <motion.div
+          initial={{ opacity: 0, y: -50, scale: 0.9 }}
+          animate={{ 
+            opacity: showToast ? 1 : 0, 
+            y: showToast ? 0 : -50,
+            scale: showToast ? 1 : 0.9
+          }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className={`absolute top-6 left-1/2 transform -translate-x-1/2 z-[9999] ${showToast ? 'pointer-events-auto' : 'pointer-events-none'}`}
+        >
+          <ProximityGlow className="rounded-2xl" c1="rgba(59,130,246,0.3)" c2="rgba(168,85,247,0.2)" radius={250} intensity={0.4}>
+            <div className="bg-gradient-to-r from-blue-900/90 via-purple-900/90 to-blue-900/90 backdrop-blur-lg border border-white/20 rounded-2xl px-8 py-4 max-w-lg shadow-2xl">
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-white font-semibold text-lg leading-snug">
+                    ¡Empieza ya! Selecciona tu ubicación, fecha y umbrales en el panel izquierdo para obtener un análisis preciso
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowToast(false)}
+                  className="flex-shrink-0 text-white/70 hover:text-white transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </ProximityGlow>
+        </motion.div>
+
+        <aside className={`flex flex-col h-full flex-shrink-0 transition-all duration-300 overflow-hidden ${panelVisible ? 'w-96' : 'w-0'}`}>
           <motion.nav
             initial="initial"
             whileHover="hover"
@@ -215,76 +265,82 @@ export default function ParameterSelectionPage({ onCalculate }) {
                   </div>
                 </ProximityGlow>
 
-                {/* Botón de cálculo */}
-                <ProximityGlow className="rounded-xl" c1="rgba(34,197,94,0.4)" c2="rgba(59,130,246,0.3)" radius={250} intensity={0.5}>
-                  <button 
-                    onClick={handleCalculate} 
-                    disabled={!canCalculate} 
-                    className={`w-full px-6 py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-3 ${
-                      canCalculate 
-                        ? 'bg-gradient-to-r from-green-600 to-blue-600 text-white hover:from-green-500 hover:to-blue-500 shadow-2xl hover:shadow-green-500/25' 
-                        : 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {loading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        <span>Calculando...</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        <span>Calcular Probabilidades</span>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </>
-                    )}
-                  </button>
-                </ProximityGlow>
 
-                {!canCalculate && (
-                  <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3">
-                    <div className="flex items-center space-x-2 text-amber-400">
-                      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="text-sm font-medium">Parámetros incompletos</span>
-                    </div>
-                    <div className="text-xs text-amber-300 mt-1">
-                      {!lat || !lon ? 'Selecciona una ubicación. ' : ''}
-                      {!date_of_interest ? 'Selecciona una fecha.' : ''}
-                    </div>
-                  </div>
-                )}
 
               </div>
             </div>
           </motion.nav>
         </aside>
 
-        <ProximityGlow className="rounded-lg">
-          <button
-            onClick={togglePanel}
-            className={`absolute top-20 bg-white dark:bg-slate-800 border shadow-lg rounded-lg p-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-300 ${panelVisible ? 'left-72' : 'left-2'}`}
-            style={{ zIndex: 9999 }}
-            title={panelVisible ? "Ocultar panel" : "Mostrar panel"}
-          >
-            <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {panelVisible ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7" />
-              )}
-            </svg>
-          </button>
-        </ProximityGlow>
+        {/* Toggle Button - Simple and reliable */}
+        <div className="absolute top-4 z-[9999] transition-all duration-300" style={{ left: panelVisible ? '350px' : '16px' }}>
+          <ProximityGlow className="rounded-lg">
+            <button
+              onClick={togglePanel}
+              className="bg-slate-900/90 backdrop-blur-sm text-white border border-slate-700 shadow-lg rounded-lg p-3 hover:bg-slate-800 transition-all duration-300"
+              title={panelVisible ? "Ocultar panel" : "Mostrar panel"}
+            >
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {panelVisible ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7" />
+                )}
+              </svg>
+            </button>
+          </ProximityGlow>
+        </div>
 
         <section className="flex-1 relative">
           <div className="absolute inset-0 m-4 rounded-2xl overflow-hidden border bg-white dark:bg-slate-900 dark:border-slate-800 shadow-sm">
             {mapMode === "3d" ? <MapboxView /> : <MapView />}
+          </div>
+          
+          {/* Extra Large Calculate Button - Bottom Right */}
+          <div className="absolute bottom-6 right-6 z-[9999]">
+            <ProximityGlow className="rounded-3xl" c1="rgba(239,68,68,0.6)" c2="rgba(220,38,127,0.5)" radius={400} intensity={0.8}>
+              <button 
+                onClick={handleCalculate} 
+                disabled={!canCalculate} 
+                className={`px-12 py-8 rounded-3xl font-black text-2xl transition-all duration-300 flex items-center justify-center space-x-6 min-w-[420px] shadow-2xl ${
+                  canCalculate 
+                    ? 'bg-gradient-to-r from-red-600 via-pink-600 to-red-700 text-white hover:from-red-500 hover:via-pink-500 hover:to-red-600 hover:shadow-red-500/40 hover:scale-110 transform' 
+                    : 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                }`}
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                    <span>Calculando...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span>Calcular Probabilidades</span>
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </>
+                )}
+              </button>
+            </ProximityGlow>
+            
+            {!canCalculate && (
+              <div className="mt-3 bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 backdrop-blur-sm">
+                <div className="flex items-center space-x-2 text-amber-400">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-medium">Parámetros incompletos</span>
+                </div>
+                <div className="text-xs text-amber-300 mt-1">
+                  {!lat || !lon ? 'Selecciona una ubicación. ' : ''}
+                  {!date_of_interest ? 'Selecciona una fecha.' : ''}
+                </div>
+              </div>
+            )}
           </div>
         </section>
       </main>

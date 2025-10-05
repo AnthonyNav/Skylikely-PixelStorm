@@ -16,6 +16,14 @@ export const useAppStore = create((set, get) => ({
   panelVisible: true,
   thresholds: { very_hot_C: 32, very_wet_mm: 10, very_windy_ms: 10 },
 
+  // Area selection states
+  selectionMode: null, // 'circle' | 'pen' | null
+  selectionShape: null, // GeoJSON Polygon
+  selectionCenter: null, // [lng, lat]
+  radiusKm: 10, // Default radius for circle mode
+  isDrawing: false,
+  drawingPoints: [], // Temporary points while drawing
+
   data: null, loading: false, error: null,
 
   setMapMode: (m) => set({ mapMode: m }),
@@ -29,18 +37,39 @@ export const useAppStore = create((set, get) => ({
   setThresholds: (t) => set({ thresholds: t }),
   setData: (d) => set({ data: d }),
 
+  // Area selection actions
+  setSelectionMode: (mode) => set({ selectionMode: mode, isDrawing: mode !== null, drawingPoints: [] }),
+  setRadiusKm: (radius) => set({ radiusKm: Math.min(radius, 22.5) }), // Limit to 22.5km
+  addDrawingPoint: (point) => set((state) => {
+    const newPoints = [...state.drawingPoints, point];
+    return { drawingPoints: newPoints };
+  }),
+  clearDrawing: () => set({ 
+    isDrawing: false, 
+    drawingPoints: [], 
+    selectionMode: null, 
+    selectionShape: null, 
+    selectionCenter: null 
+  }),
+  completeSelection: (shape, center) => set({ 
+    selectionShape: shape, 
+    selectionCenter: center, 
+    isDrawing: false, 
+    selectionMode: null,
+    drawingPoints: [],
+    lat: center[1], // Update coordinates to center
+    lon: center[0]
+  }),
+
   calculate: async () => {
-    const s = get();
     set({ loading: true, error: null });
+    const { date_of_interest } = get();
     try {
-      const doy = dateISOToDoy(s.date_of_interest);
-      // convención: <ciudad>_doyNNN.json (ajusta el prefijo si quieres)
-      const path = `/data/samples/texas_doy${String(doy).padStart(3, "0")}.json`;
-      const json = await fetchSample(path);
+      const doy = dateISOToDoy(date_of_interest);
+      const json = await fetchSample(`/data/samples/puebla_doy${doy}.json`);
       set({ data: json, loading: false });
     } catch {
-      set({ loading: false, error: "No hay JSON de prueba para esa fecha." });
+      set({ loading: false, error: "No hay datos para esa fecha. Carga de ejemplo fallida." });
     }
   },
 }));
-

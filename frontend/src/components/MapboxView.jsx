@@ -6,7 +6,7 @@ import { useAppStore } from "@store/useAppStore.js";
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 export default function MapboxView() {
-  const { lat, lon, setCoords, panelVisible } = useAppStore();
+  const { lat, lon, setCoords, panelVisible, setMapMode } = useAppStore();
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
@@ -20,6 +20,40 @@ export default function MapboxView() {
   const interacting = useRef(false);
   // Rotar solo cuando el globo se ve completo (zoom bajo)
   const ROTATE_ZOOM_MAX = 2.0; // ajusta este valor a tu preferencia
+
+  // Estado para el punto seleccionado
+  const [selectedPoint, setSelectedPoint] = useState(null);
+
+  // Función para cambiar a modo 2D simplificada
+  const switchTo2DWithAreaSelection = () => {
+    if (!selectedPoint) {
+      alert('Primero haz clic en un punto del mapa para seleccionar la ubicación');
+      return;
+    }
+    
+    // Actualizar coordenadas del store con el punto seleccionado
+    setCoords(selectedPoint.lat, selectedPoint.lng);
+    
+    // Cambiar a modo 2D
+    setMapMode('2d');
+  };
+
+  const handleMapClick = (e) => {
+    // Click para seleccionar punto y mover pin
+    const { lng, lat: clickedLat } = e.lngLat;
+    
+    // Guardar el punto seleccionado
+    setSelectedPoint({ lng, lat: clickedLat });
+    
+    stopRotation();
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+
+    setCoords(clickedLat, lng);
+    markerRef.current?.setLngLat([lng, clickedLat]);
+    mapRef.current.flyTo({ center: [lng, clickedLat], zoom: Math.max(mapRef.current.getZoom(), 6), duration: 1000 });
+  };
+
+
 
   const stopRotation = () => {
     if (rafId.current) {
@@ -113,6 +147,9 @@ export default function MapboxView() {
         });
         // Iniciar rotación si está activada
         startRotation();
+        
+        // Click para mover pin y cambio de modo (incluye Ctrl+Click)
+        map.on("click", handleMapClick);
       } catch (e) {
         console.warn("Globe features not available:", e);
       }
@@ -123,17 +160,7 @@ export default function MapboxView() {
       .setLngLat([lon, lat])
       .addTo(map);
 
-    // Click para mover pin y volar
-    map.on("click", (e) => {
-      const { lng, lat: clickedLat } = e.lngLat;
-      // Solo parar en click; no reanudar automáticamente para no interferir con rotación manual posterior
-      stopRotation();
-      if (resumeTimer.current) clearTimeout(resumeTimer.current);
 
-      setCoords(clickedLat, lng);
-      markerRef.current?.setLngLat([lng, clickedLat]);
-      map.flyTo({ center: [lng, clickedLat], zoom: Math.max(map.getZoom(), 6), duration: 1000 });
-    });
 
     // Controles de navegación
   // Controles de navegación con brújula (indica que se puede rotar)
@@ -212,9 +239,29 @@ export default function MapboxView() {
     }
   }, [lat, lon]);
 
+
+
+
+
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       <div ref={mapContainerRef} style={{ width: "100%", height: "100%", borderRadius: "inherit" }} />
+      
+      {/* Indicaciones visuales */}
+      <div className="absolute bottom-4 left-4 z-[99999]">
+        <div className="bg-black/70 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm font-medium border border-white/20 pointer-events-none mb-2">
+          🌍 Modo 3D • Haz clic en un punto del mapa
+        </div>
+        
+        {selectedPoint && (
+          <button
+            onClick={switchTo2DWithAreaSelection}
+            className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-500 hover:to-green-500 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 pointer-events-auto shadow-lg border border-white/20"
+          >
+            📍 Seleccionar área personalizada
+          </button>
+        )}
+      </div>
     </div>
   );
 }

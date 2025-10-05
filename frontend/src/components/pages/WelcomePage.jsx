@@ -1,205 +1,227 @@
 import { motion } from "framer-motion";
 import ProximityGlow from "@components/ui/ProximityGlow.jsx";
+import LottieBackground from "@components/ui/LottieBackground.jsx";
 
 export default function WelcomePage({ onStart }) {
   return (
-    <div className="relative min-h-screen bg-slate-950 overflow-hidden">
-      {/* Background gradient and patterns inspired by saas-component-library */}
+    <div className="relative min-h-screen overflow-hidden bg-slate-950">
+      {/* Lottie weather animations background */}
+      <LottieBackground />
+      
+      {/* Animated background elements */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900" />
-        <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/20 via-transparent to-purple-900/20" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-cyan-900/30 via-transparent to-transparent" />
+        {/* Gradient orbs */}
+        <motion.div
+          animate={{
+            x: [0, 100, 0],
+            y: [0, -100, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, -150, 0],
+            y: [0, 100, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-3/4 right-1/4 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, 80, 0],
+            y: [0, -80, 0],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-1/2 right-1/3 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl"
+        />
         
-        {/* Animated background elements */}
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" />
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
       </div>
 
-      {/* Grid pattern overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#334155_1px,transparent_1px),linear-gradient(to_bottom,#334155_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
-
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12">
-        <div className="mx-auto max-w-6xl text-center">
+      {/* Main content */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6">
+        <div className="max-w-6xl mx-auto text-center">
           
-          {/* Hero Section */}
+          {/* Header with logo */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-            className="mb-12"
+            className="mb-16"
           >
-            {/* Logo with modern styling */}
-            <div className="mb-8 flex justify-center">
-              <div className="relative">
-                <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 opacity-75 blur-lg" />
-                <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 via-purple-600 to-cyan-500 shadow-2xl">
-                  <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-                  </svg>
-                </div>
+            {/* Logo with glow effect */}
+            <div className="relative mb-8">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-600 to-cyan-500 rounded-3xl blur-xl opacity-60 animate-pulse" />
+              <div className="relative w-32 h-32 mx-auto bg-gradient-to-br from-blue-500 via-purple-600 to-cyan-500 rounded-3xl flex items-center justify-center shadow-2xl">
+                <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                </svg>
               </div>
             </div>
-
+            
             {/* Main heading with gradient text */}
-            <h1 className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-              <span className="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            <h1 className="text-6xl md:text-7xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
                 Sky
               </span>
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                likely
-              </span>
+              <span className="text-white">likely</span>
             </h1>
-
-            {/* Subtitle */}
-            <p className="mx-auto mb-8 max-w-2xl text-xl text-slate-300 sm:text-2xl">
-              Análisis climático probabilístico avanzado para{" "}
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text font-semibold text-transparent">
-                condiciones extremas
-              </span>{" "}
-              en cualquier ubicación del mundo.
+            
+            <p className="text-xl md:text-2xl text-slate-300 font-light max-w-3xl mx-auto leading-relaxed">
+              Revoluciona tu comprensión del clima con análisis probabilísticos avanzados 
+              para cualquier ubicación del planeta
             </p>
-
-            {/* CTA Button with modern styling */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-            >
-              <ProximityGlow className="inline-block rounded-2xl" c1="rgba(59,130,246,0.5)" c2="rgba(168,85,247,0.4)" radius={300} intensity={0.6}>
-                <button
-                  onClick={onStart}
-                  className="group relative inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-blue-500/25"
-                >
-                  <span>Comenzar análisis</span>
-                  <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                  
-                  {/* Button glow effect */}
-                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 opacity-0 blur-lg transition-opacity group-hover:opacity-30" />
-                </button>
-              </ProximityGlow>
-            </motion.div>
           </motion.div>
 
-          {/* Features Grid with bento-style layout */}
+          {/* Feature cards */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="mx-auto max-w-5xl"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 max-w-5xl mx-auto items-stretch"
           >
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              
-              {/* Feature 1 - Location */}
-              <ProximityGlow className="rounded-2xl">
-                <motion.div
-                  whileHover={{ y: -5 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="group relative h-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 p-8 backdrop-blur-sm transition-all duration-300 hover:border-blue-500/50"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                  
-                  <div className="relative z-10">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20">
-                      <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+            {[
+              {
+                icon: (
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                ),
+                title: "Ubicación Inteligente",
+                description: "Planea tu boda, picnic o día de playa sin sorpresas. Selecciona tu ubicación y descubre cómo puede jugarte el clima.",
+                gradient: "from-blue-500/20 to-blue-600/20",
+                iconColor: "text-blue-400",
+                delay: 0.5
+              },
+              {
+                icon: (
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                ),
+                title: "Análisis Temporal",
+                description: "¿Vacaciones en verano o un hike en otoño? Ajusta la fecha y mira qué tan probable es tener sol, lluvia o calor extremo.",
+                gradient: "from-purple-500/20 to-purple-600/20",
+                iconColor: "text-purple-400",
+                delay: 0.6
+              },
+              {
+                icon: (
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                ),
+                title: "Insights Probabilísticos",
+                description: "No adivines: recibe porcentajes claros de riesgo climático para decidir si reprogramar, llevar paraguas o disfrutar sin preocupaciones.",
+                gradient: "from-cyan-500/20 to-cyan-600/20",
+                iconColor: "text-cyan-400",
+                delay: 0.7
+              }
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ y: 40, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: feature.delay, duration: 0.6 }}
+                className="group relative"
+              >
+                <ProximityGlow className="rounded-2xl h-full" c1="rgba(59,130,246,0.2)" c2="rgba(168,85,247,0.15)">
+                  <div className="relative overflow-hidden bg-slate-900/60 backdrop-blur-sm border border-slate-800/50 rounded-2xl p-8 h-full min-h-[320px] transition-all duration-500 group-hover:border-slate-700/50 flex flex-col">
+                    {/* Background gradient */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    
+                    {/* Content */}
+                    <div className="relative z-10 flex flex-col items-center text-center h-full">
+                      <div className={`w-20 h-20 rounded-2xl bg-slate-800/50 border border-slate-700 flex items-center justify-center mb-6 ${feature.iconColor} group-hover:scale-110 transition-all duration-300 flex-shrink-0`}>
+                        {feature.icon}
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-4 group-hover:text-blue-100 transition-colors flex-shrink-0">
+                        {feature.title}
+                      </h3>
+                      <p className="text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors flex-grow flex items-center">
+                        {feature.description}
+                      </p>
                     </div>
-                    <h3 className="mb-2 text-xl font-semibold text-white">Ubicación Precisa</h3>
-                    <p className="text-slate-400">Busca por nombre o selecciona directamente en mapas 2D/3D interactivos</p>
                   </div>
-                </motion.div>
-              </ProximityGlow>
-
-              {/* Feature 2 - Calendar */}
-              <ProximityGlow className="rounded-2xl">
-                <motion.div
-                  whileHover={{ y: -5 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="group relative h-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 p-8 backdrop-blur-sm transition-all duration-300 hover:border-purple-500/50"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                  
-                  <div className="relative z-10">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20">
-                      <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <h3 className="mb-2 text-xl font-semibold text-white">Fecha Específica</h3>
-                    <p className="text-slate-400">Analiza cualquier día del año con ventana temporal ajustable</p>
-                  </div>
-                </motion.div>
-              </ProximityGlow>
-
-              {/* Feature 3 - Analytics */}
-              <ProximityGlow className="rounded-2xl sm:col-span-2 lg:col-span-1">
-                <motion.div
-                  whileHover={{ y: -5 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="group relative h-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 p-8 backdrop-blur-sm transition-all duration-300 hover:border-cyan-500/50"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                  
-                  <div className="relative z-10">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20">
-                      <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                    </div>
-                    <h3 className="mb-2 text-xl font-semibold text-white">Análisis Probabilístico</h3>
-                    <p className="text-slate-400">Visualiza percentiles P10, P50, P90 y probabilidades de eventos extremos</p>
-                  </div>
-                </motion.div>
-              </ProximityGlow>
-
-            </div>
+                </ProximityGlow>
+              </motion.div>
+            ))}
           </motion.div>
 
-          {/* Bottom section */}
+          {/* CTA Section */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.8 }}
-            className="mt-16 text-center"
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+            className="text-center"
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/50 px-4 py-2 text-sm text-slate-400 backdrop-blur-sm">
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              Demo sin backend • Datos precomputados
+            <ProximityGlow 
+              className="rounded-3xl inline-block" 
+              c1="rgba(59,130,246,0.5)" 
+              c2="rgba(168,85,247,0.4)" 
+              radius={300} 
+              intensity={0.6}
+            >
+              <button
+                onClick={onStart}
+                className="group relative px-12 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 text-white font-bold text-xl rounded-3xl shadow-2xl hover:shadow-blue-500/30 transition-all duration-500 hover:scale-105 overflow-hidden"
+              >
+                {/* Animated background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Button content */}
+                <span className="relative z-10 flex items-center space-x-4">
+                  <span>Comenzar Análisis</span>
+                  <motion.svg 
+                    className="w-6 h-6" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                    whileHover={{ x: 5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </motion.svg>
+                </span>
+              </button>
+            </ProximityGlow>
+            
+            <div className="mt-8 flex items-center justify-center space-x-8 text-sm text-slate-500">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span>Demo en vivo</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                <span>Datos precomputados</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                <span>Sin registro requerido</span>
+              </div>
             </div>
           </motion.div>
 
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
+      {/* Bottom gradient fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none" />
     </div>
   );
 }
