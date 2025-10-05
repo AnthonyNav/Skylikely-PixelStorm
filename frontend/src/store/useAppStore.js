@@ -10,10 +10,12 @@ export const useAppStore = create((set, get) => ({
   window_days: 7,
   spatial_mode: "nearest",
   area_km: 25,
+  mapMode: "2d",
   thresholds: { very_hot_C: 32, very_wet_mm: 10, very_windy_ms: 10 },
 
   data: null, loading: false, error: null,
 
+  setMapMode: (m) =>set({mapMode:m}),
   setCoords: (lat, lon) => set({ lat, lon }),
   setDate: (date) => set({ date_of_interest: date }),
   setEngine: (engine) => set({ engine }),
