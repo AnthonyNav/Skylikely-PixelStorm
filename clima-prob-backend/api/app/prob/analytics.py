@@ -1,10 +1,18 @@
+<<<<<<< HEAD
 
+=======
+# api/app/prob/analytics.py
+>>>>>>> 1351d471960cc82280ceb7005dd8050fbef96536
 from __future__ import annotations
 import numpy as np
 import pandas as pd
 from typing import Dict, Iterable, Optional
 
+<<<<<<< HEAD
 
+=======
+# Mapa variable -> clave de umbral (si viene del request)
+>>>>>>> 1351d471960cc82280ceb7005dd8050fbef96536
 THRESHOLD_KEY = {
     "Tmax_C": "very_hot_Tmax_C",
     "Tmin_C": "very_cold_Tmin_C",
@@ -16,15 +24,28 @@ THRESHOLD_KEY = {
 ALLOWED_VARS = {"Tmax_C", "Tmin_C", "WS_ms", "P_mmday", "HI_C", "RH_pct"}
 
 def _doy365(idx: pd.DatetimeIndex) -> np.ndarray:
+<<<<<<< HEAD
     """Day-of-year in 365-day calendar (29-feb → 28-feb)."""
     months = idx.month.values
     days   = idx.day.values
     days = np.where((months == 2) & (days == 29), 28, days)
+=======
+    """Day-of-year en calendario 365 (29-feb → 28-feb)."""
+    # Asegura UTC/naive OK (mes/día se toma del índice)
+    months = idx.month.values
+    days   = idx.day.values
+    days = np.where((months == 2) & (days == 29), 28, days)
+    # cumulativos de días al inicio de cada mes
+>>>>>>> 1351d471960cc82280ceb7005dd8050fbef96536
     _DOY_CUM = np.array([0,31,59,90,120,151,181,212,243,273,304,334], dtype=int)
     return _DOY_CUM[months - 1] + days
 
 def _window_mask(idx: pd.DatetimeIndex, date_of_interest: pd.Timestamp, window_days: int) -> np.ndarray:
+<<<<<<< HEAD
     """Window mask ±K days around target DOY (circular)."""
+=======
+    """Máscara de ventana ±K días alrededor del DOY objetivo (circular)."""
+>>>>>>> 1351d471960cc82280ceb7005dd8050fbef96536
     idx_utc = idx.tz_convert("UTC") if getattr(idx, "tz", None) is not None else idx
     doi = pd.to_datetime(date_of_interest)
     doi = doi.tz_convert("UTC") if doi.tzinfo is not None else doi.tz_localize("UTC")
