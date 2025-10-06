@@ -1,0 +1,84 @@
+# cloudbuild.yaml (en la raíz del repo)
+substitutions:
+  _REGION: "us-central1"
+  _SERVICE: "clima-prob-api"
+  _REPO: "containers"
+  _IMAGE: "us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}"
+  _ALLOWED_ORIGINS: "https://TU_FRONT_DOMAIN"  # cambia por el dominio real del front
+  _PYTEST_ARGS: "-q"
+  _MIN_INSTANCES: "0"
+  _MAX_INSTANCES: "3"
+  _CPU: "1"
+  _MEMORY: "1Gi"
+  _CONCURRENCY: "80"
+  _LOG_LEVEL: "info"
+  _OFFLINE_MODE: "false"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/EARTHDATA_USERNAME/versions/latest
+      env: EARTHDATA_USERNAME
+    - versionName: projects/$PROJECT_ID/secrets/EARTHDATA_PASSWORD/versions/latest
+      env: EARTHDATA_PASSWORD
+
+steps:
+  - id: unit-tests
+    name: python:3.11-slim
+    dir: api
+    entrypoint: bash
+    secretEnv:
+      - EARTHDATA_USERNAME
+      - EARTHDATA_PASSWORD
+    args:
+      - -c
+      - |
+          set -euo pipefail
+          apt-get update && apt-get install -y --no-install-recommends gcc g++ libnetcdf-dev && rm -rf /var/lib/apt/lists/*
+          pip install --no-cache-dir --upgrade pip
+          pip install --no-cache-dir -r requirements.txt pytest
+          pytest ${_PYTEST_ARGS}
+
+  - id: build-image
+    name: gcr.io/cloud-builders/docker
+    dir: api
+    args: ["build", "-t", "${_IMAGE}:$COMMIT_SHA", "."]
+
+  - id: tag-latest
+    name: gcr.io/cloud-builders/docker
+    args: ["tag", "${_IMAGE}:$COMMIT_SHA", "${_IMAGE}:latest"]
+
+  - id: push-image
+    name: gcr.io/cloud-builders/docker
+    args: ["push", "${_IMAGE}:$COMMIT_SHA"]
+
+  - id: push-latest
+    name: gcr.io/cloud-builders/docker
+    args: ["push", "${_IMAGE}:latest"]
+
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      [
+        "run","deploy","${_SERVICE}",
+        "--image","${_IMAGE}:$COMMIT_SHA",
+        "--region","${_REGION}",
+        "--platform","managed",
+        "--allow-unauthenticated",
+        "--port","8080",
+        "--min-instances","${_MIN_INSTANCES}",
+        "--max-instances","${_MAX_INSTANCES}",
+        "--cpu","${_CPU}",
+        "--memory","${_MEMORY}",
+        "--concurrency","${_CONCURRENCY}",
+        "--set-env-vars","LOG_LEVEL=${_LOG_LEVEL},OFFLINE_MODE=${_OFFLINE_MODE},ALLOWED_ORIGINS=${_ALLOWED_ORIGINS}",
+        "--update-secrets","EARTHDATA_USERNAME=EARTHDATA_USERNAME:latest",
+        "--update-secrets","EARTHDATA_PASSWORD=EARTHDATA_PASSWORD:latest"
+      ]
+
+images:
+  - "${_IMAGE}:$COMMIT_SHA"
+  - "${_IMAGE}:latest"
