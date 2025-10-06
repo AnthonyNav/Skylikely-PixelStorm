@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import { dateISOToDoy } from "@lib/mapping.js";
 
 export default function ParameterSelectionPage({ onCalculate }) {
-  const { 
+  const {
     data, loading, mapMode, panelVisible, togglePanel,
     lat, lon, date_of_interest, engine, window_days, spatial_mode, area_km,
     setDate, setEngine, setWindow, setSpatialMode, setAreaKm, calculate
@@ -38,10 +38,10 @@ export default function ParameterSelectionPage({ onCalculate }) {
 
   const handleCalculate = async () => {
     if (!canCalculate) return;
-    
+
     // Ejecutar el cálculo del store
     await calculate();
-    
+
     // Simular datos para el prototipo (reemplazar con datos reales del store)
     const resultData = {
       location: { lat, lon },
@@ -50,7 +50,7 @@ export default function ParameterSelectionPage({ onCalculate }) {
       // Aquí irían los resultados reales del cálculo
       results: data
     };
-    
+
     onCalculate(resultData);
   };
 
@@ -77,8 +77,8 @@ export default function ParameterSelectionPage({ onCalculate }) {
         {/* Motivational Toast - Top Center */}
         <motion.div
           initial={{ opacity: 0, y: -50, scale: 0.9 }}
-          animate={{ 
-            opacity: showToast ? 1 : 0, 
+          animate={{
+            opacity: showToast ? 1 : 0,
             y: showToast ? 0 : -50,
             scale: showToast ? 1 : 0.9
           }}
@@ -125,21 +125,21 @@ export default function ParameterSelectionPage({ onCalculate }) {
           >
             <motion.div
               className="absolute -inset-8 pointer-events-none"
-              variants={{ initial: { opacity: 0 }, hover: { opacity: 1, transition: { duration: 0.5, ease: [0.4,0,0.2,1] } } }}
+              variants={{ initial: { opacity: 0 }, hover: { opacity: 1, transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] } } }}
               style={{
                 background:
                   "radial-gradient(600px circle at var(--mx,0px) var(--my,0px), rgba(59,130,246,0.12), transparent 40%), radial-gradient(900px circle at var(--mx,0px) var(--my,0px), rgba(168,85,247,0.09), transparent 60%)",
                 filter: "blur(20px)",
               }}
             />
-            
+
             <div className="p-4 border-b border-white/30 dark:border-white/10 flex-shrink-0">
               <h2 className="text-lg font-semibold text-slate-800 dark:text-white mb-4">Configuración</h2>
             </div>
-            
-            <div className="flex-1 min-h-0 overflow-y-auto custom-scroll" style={{scrollbarWidth: 'thin', scrollbarColor: '#1a1a1a #000000'}}>
+
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scroll" style={{ scrollbarWidth: 'thin', scrollbarColor: '#1a1a1a #000000' }}>
               <div className="p-4 space-y-4">
-                
+
                 {/* Sección 1: Vista y Búsqueda */}
                 <ProximityGlow className="rounded-xl">
                   <div className="rounded-xl p-4 border glass-card border-white/30 dark:border-white/10" style={{ backdropFilter: "blur(10px)", boxShadow: "0 10px 30px rgba(2,6,23,0.08)" }}>
@@ -170,7 +170,7 @@ export default function ParameterSelectionPage({ onCalculate }) {
                   <div className="rounded-xl p-4 border glass-card border-white/30 dark:border-white/10" style={{ backdropFilter: "blur(10px)", boxShadow: "0 10px 30px rgba(2,6,23,0.08)" }}>
                     <div className="mb-4"><LiquidHeading>Fecha y Parámetros</LiquidHeading></div>
                     <div className="space-y-4">
-                      
+
                       {/* Ubicación actual */}
                       <div className="bg-slate-900/40 rounded-lg p-3 border border-slate-700">
                         <div className="flex items-center justify-between">
@@ -188,10 +188,10 @@ export default function ParameterSelectionPage({ onCalculate }) {
                       <div>
                         <label className="font-medium block mb-2 text-slate-700 dark:text-white text-sm">Fecha de análisis</label>
                         <ProximityGlow className="rounded-lg">
-                          <input 
-                            type="date" 
-                            value={date_of_interest} 
-                            onChange={(e)=>setDate(e.target.value)} 
+                          <input
+                            type="date"
+                            value={date_of_interest}
+                            onChange={(e) => setDate(e.target.value)}
                             className="bg-black/60 backdrop-blur-sm border border-white/20 text-white rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                         </ProximityGlow>
@@ -202,14 +202,13 @@ export default function ParameterSelectionPage({ onCalculate }) {
                       <div>
                         <label className="font-medium block mb-2 text-slate-700 dark:text-white text-sm">Modelo de análisis</label>
                         <ProximityGlow className="rounded-lg">
-                          <select 
-                            value={engine} 
-                            onChange={(e)=>setEngine(e.target.value)} 
+                          <select
+                            value={engine}
+                            onChange={(e) => setEngine(e.target.value)}
                             className="bg-black/60 backdrop-blur-sm border border-white/20 text-white rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           >
                             <option value="logistic">Logístico</option>
-                            <option value="climatology">Climatología</option>
-                            <option value="gev">GEV</option>
+                            <option value="empirico">Empírico</option>
                           </select>
                         </ProximityGlow>
                       </div>
@@ -218,48 +217,18 @@ export default function ParameterSelectionPage({ onCalculate }) {
                       <div>
                         <label className="font-medium block mb-2 text-slate-700 dark:text-white text-sm">Ventana temporal: ±{window_days} días</label>
                         <ProximityGlow className="rounded-lg">
-                          <input 
-                            type="range" 
-                            min="5" 
-                            max="45" 
-                            value={window_days} 
-                            onChange={(e)=>setWindow(parseInt(e.target.value))} 
-                            className="w-full custom-slider" 
+                          <input
+                            type="range"
+                            min="5"
+                            max="25"
+                            value={window_days}
+                            onChange={(e) => setWindow(parseInt(e.target.value))}
+                            className="w-full custom-slider"
                           />
                         </ProximityGlow>
                         <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                           Datos históricos en un rango de {window_days * 2} días alrededor de la fecha
                         </div>
-                      </div>
-
-                      {/* Modo espacial */}
-                      <div>
-                        <label className="font-medium block mb-2 text-slate-700 dark:text-white text-sm">Resolución espacial</label>
-                        <ProximityGlow className="rounded-lg">
-                          <select 
-                            value={spatial_mode} 
-                            onChange={(e)=>setSpatialMode(e.target.value)} 
-                            className="bg-black/60 backdrop-blur-sm border border-white/20 text-white rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          >
-                            <option value="nearest">Punto más cercano</option>
-                            <option value="box_avg">Promedio de área</option>
-                          </select>
-                        </ProximityGlow>
-                        
-                        {spatial_mode === "box_avg" && (
-                          <div className="mt-3">
-                            <label className="text-sm text-slate-700 dark:text-white font-medium block mb-1">Área de promedio (km)</label>
-                            <ProximityGlow className="rounded-lg">
-                              <input 
-                                type="number" 
-                                min="1" 
-                                value={area_km}
-                                onChange={(e)=>setAreaKm(Number(e.target.value))}
-                                className="bg-black/60 backdrop-blur-sm border border-white/20 text-white rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                              />
-                            </ProximityGlow>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -295,53 +264,57 @@ export default function ParameterSelectionPage({ onCalculate }) {
           <div className="absolute inset-0 m-4 rounded-2xl overflow-hidden border bg-white dark:bg-slate-900 dark:border-slate-800 shadow-sm">
             {mapMode === "3d" ? <MapboxView /> : <MapView />}
           </div>
+
+          {/* Responsive Calculate Button – corner on desktop, centered on mobile */}
+            <div className="fixed bottom-4 sm:bottom-6 w-full flex justify-center lg:justify lg:pr-6 z-[9999]">
           
-          {/* Extra Large Calculate Button - Bottom Right */}
-          <div className="absolute bottom-6 right-6 z-[9999]">
-            <ProximityGlow className="rounded-3xl" c1="rgba(239,68,68,0.6)" c2="rgba(220,38,127,0.5)" radius={400} intensity={0.8}>
-              <button 
-                onClick={handleCalculate} 
-                disabled={!canCalculate} 
-                className={`px-12 py-8 rounded-3xl font-black text-2xl transition-all duration-300 flex items-center justify-center space-x-6 min-w-[420px] shadow-2xl ${
-                  canCalculate 
-                    ? 'bg-gradient-to-r from-red-600 via-pink-600 to-red-700 text-white hover:from-red-500 hover:via-pink-500 hover:to-red-600 hover:shadow-red-500/40 hover:scale-110 transform' 
-                    : 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                }`}
+            <div className="w-full sm:w-auto max-w-[480px]">
+              <ProximityGlow
+                className="rounded-3xl w-full"
+                c1="rgba(239,68,68,0.6)"
+                c2="rgba(220,38,127,0.5)"
+                radius={400}
+                intensity={0.8}
               >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                    <span>Calculando...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <span>Calcular Probabilidades</span>
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </>
-                )}
-              </button>
-            </ProximityGlow>
-            
-            {!canCalculate && (
-              <div className="mt-3 bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 backdrop-blur-sm">
-                <div className="flex items-center space-x-2 text-amber-400">
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-sm font-medium">Parámetros incompletos</span>
-                </div>
-                <div className="text-xs text-amber-300 mt-1">
-                  {!lat || !lon ? 'Selecciona una ubicación. ' : ''}
-                  {!date_of_interest ? 'Selecciona una fecha.' : ''}
-                </div>
-              </div>
-            )}
+                <button
+                  onClick={handleCalculate}
+                  disabled={!canCalculate}
+                  className={`w-full flex items-center justify-center gap-3 font-extrabold transition-all duration-300 rounded-3xl shadow-2xlpx-6 py-4 sm:px-10 sm:py-6text-lg sm:text-2xl border-2 border-transparent
+          ${canCalculate
+                      ? 'bg-gradient-to-r from-red-600 via-pink-600 to-red-700 text-white hover:from-red-500 hover:via-pink-500 hover:to-red-600 hover:shadow-red-500/40 hover:scale-105 active:scale-100'
+                      : 'bg-slate-700 text-slate-400 cursor-not-allowed border-slate-600'
+                    }`}
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-white"></div>
+                      <span className="text-sm sm:text-xl">Calculando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-5 h-5 sm:w-6 sm:h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round"strokeWidth={2}d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-sm sm:text-xl whitespace-nowrap">
+                        Calcular Probabilidades
+                      </span>
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                      </svg>
+                    </>
+                  )}
+                </button>
+              </ProximityGlow>
+            </div>
           </div>
+
+
+
         </section>
       </main>
     </>

@@ -327,7 +327,7 @@ export default function MapView() {
       </div>
 
       {/* Indicaciones visuales */}
-      <div className="absolute bottom-4 left-4 z-[99999]">
+      <div className="absolute bottom-4 left-4 z-[99999] mb-12">
         <div className="bg-black/70 backdrop-blur-sm text-white px-3 py-2 rounded-lg text-sm font-medium border border-white/20 pointer-events-none">
           💡 Clic derecho para seleccionar área
         </div>

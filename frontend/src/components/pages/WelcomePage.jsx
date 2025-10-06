@@ -4,12 +4,12 @@ import LottieBackground from "@components/ui/LottieBackground.jsx";
 
 export default function WelcomePage({ onStart }) {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950">
+    <div className="relative min-h-screen overflow-x-hidden overflow-y-auto bg-slate-950">
       {/* Lottie weather animations background */}
       <LottieBackground />
       
       {/* Animated background elements */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 pointer-events-none">
         {/* Gradient orbs */}
         <motion.div
           animate={{
