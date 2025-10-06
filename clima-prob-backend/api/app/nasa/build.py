@@ -13,7 +13,7 @@ def build_dataset(lat: float, lon: float, start_iso: str, end_iso: str) -> pd.Da
     
     logger.info("🌍 Fetching real NASA data...")
     
-    # Solo intentar datos reales - sin fallback sintético por ahora
+
     gldas = gldas_daily_series(lat, lon, start_iso, end_iso)
     logger.info("✅ GLDAS data fetched successfully")
     
