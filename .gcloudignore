@@ -1,0 +1,11 @@
+# ignora notebooks y datos locales
+**/.ipynb_checkpoints/
+notebooks/
+data_*/
+data/
+.local/
+.env
+.env.*
+__pycache__/
+.git/
+.gitignore
